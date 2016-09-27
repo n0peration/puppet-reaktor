@@ -22,8 +22,17 @@ class reaktor::service::debian {
         target => '/lib/init/upstart-job',
       }
     }
+    'systemd': {
+      $init_mode = '0644'
+      $init_file_reaktor = "${::reaktor::init_dir}/reaktor.conf"
+      $init_file_reaktor_redis   = "${::reaktor::init_dir}/reaktor-redis.conf"
+
+      ::systemd::unit_file { 'reaktor.service':
+        content => template('reaktor/reaktor.service.debian.erb'),
+      }
+    }
     default: {
-      fail('Please, specify one of the following implementd service providers: upstart')
+      fail('Please, specify one of the following implemented service providers: upstart, systemd')
     }
   }
 
