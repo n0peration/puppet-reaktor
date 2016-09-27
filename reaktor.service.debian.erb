@@ -1,0 +1,25 @@
+[Unit]
+Description=Starts the rake task for running reaktor
+Restart=on-failure
+RestartSec=60
+
+[Service]
+Type=forking
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /run/reaktor
+ExecStartPre=/bin/chown reaktor:reaktor /run/reaktor
+ExecStart=/usr/local/bin/rake start
+ExecStop=/usr/local/bin/rake stop
+EnvironmentFile=<%= scope['::reaktor::homedir'] %>/etc/reaktor_environment
+<% if not scope['::reaktor::notifiers'].empty? -%>
+<% scope['::reaktor::notifiers'].keys.each do |key| -%>
+EnvironmentFile=<%= scope['::reaktor::homedir'] -%>/etc/<%= key -%>_environment
+<% end -%>
+<% end -%>
+WorkingDirectory=<%= scope['::reaktor::_install_dir'] %>
+User=<%= scope['::reaktor::user'] %>
+Group=<%= scope['::reaktor::group'] %>
+PIDFile=/run/reaktor/reaktor.<%= scope['::reaktor::port'] %>.pid
+
+[Install]
+WantedBy=multi-user.target
